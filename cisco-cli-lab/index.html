@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cisco CLI Practice Lab</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#">CLI<span>Lab</span></a>
+    <div class="header-actions">
+      <label for="deviceType">Device</label>
+      <select id="deviceType" aria-label="Device type">
+        <option value="router">Router</option>
+        <option value="switch">Switch</option>
+      </select>
+      <button class="button ghost" id="resetButton">Reset device</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div class="eyebrow">NETWORK FUNDAMENTALS · PRACTICE LAB</div>
+      <h1>Configure a secure device baseline</h1>
+      <p>Use the simulated Cisco IOS terminal to complete the assignment. The simulator will respond like a router or switch, but it will not reveal the command sequence.</p>
+    </section>
+
+    <section class="workspace">
+      <article class="terminal-card">
+        <div class="terminal-bar">
+          <div class="lights" aria-hidden="true"><i></i><i></i><i></i></div>
+          <span id="terminalTitle">Router console</span>
+          <button id="clearButton" class="terminal-link">clear screen</button>
+        </div>
+        <div id="terminal" class="terminal" role="log" aria-live="polite" aria-label="Cisco IOS terminal output"></div>
+        <div class="command-row">
+          <span id="prompt" class="prompt">Router&gt;</span>
+          <input id="commandInput" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="IOS command" autofocus>
+        </div>
+      </article>
+
+      <aside class="assignment-card">
+        <div class="assignment-heading">
+          <span>ASSIGNMENT</span>
+          <span class="time">~6 min</span>
+        </div>
+        <h2>Device requirements</h2>
+        <p>Configure this fresh device so it meets all five requirements:</p>
+        <ol>
+          <li>Set the hostname to <code>EDGE-1</code>.</li>
+          <li>Set the enable secret to <code>Cisco123!</code>.</li>
+          <li>Protect console line 0 with password <code>ConPass1</code> and require login.</li>
+          <li>Protect VTY lines 0 through 4 with password <code>VtyPass1</code> and require login.</li>
+          <li>Enable password encryption.</li>
+        </ol>
+        <p class="verify-note">Inspect your work from privileged EXEC mode before submitting.</p>
+        <button id="checkButton" class="button primary">Check configuration</button>
+        <div id="results" class="results" hidden></div>
+      </aside>
+    </section>
+
+    <section class="teacher-note">
+      <h2>Practice without answer giveaways</h2>
+      <p>No command list, live objective completion, autocomplete, or configuration copy button is included. IOS-style error messages still help students recognize invalid input.</p>
+    </section>
+  </main>
+
+  <footer>Independent classroom simulator. Cisco and IOS are trademarks of Cisco Systems, Inc.</footer>
+  <script src="engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
