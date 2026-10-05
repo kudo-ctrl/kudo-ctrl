@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Let's Telnet! VTY Lines Video Organizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Lexend:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EDFF; --paper:#FFFFFF; --ink:#23224A; --ink-soft:#5A5985; --line:#D4D8F5;
+  --pink:#FF7AB6; --sun:#FFC93C; --mint:#2FCBA8; --cobalt:#4B5BFF; --lilac:#B9A6FF;
+  --pink-tint:#FFE3F0; --sun-tint:#FFF3CF; --mint-tint:#D8F7EF; --cobalt-tint:#E1E4FF; --lilac-tint:#EEE8FF;
+  --field:#F6F7FF; --field-line:#9EA6F0;
+  --term-bg:#1B1A3A; --term-fg:#E8E6FF; --term-dim:#8F8CC4; --term-ok:#7CF2C9; --term-warn:#FFD36E;
+  --shadow:0 6px 0 rgba(35,34,74,.12);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#14132B; --paper:#1F1E3D; --ink:#F1F0FF; --ink-soft:#B3B1DA; --line:#34335C;
+    --pink-tint:#43233A; --sun-tint:#3F3720; --mint-tint:#1B3A35; --cobalt-tint:#262A5C; --lilac-tint:#2E2858;
+    --field:#2A2950; --field-line:#6C73D6; --term-bg:#0F0E24; --shadow:0 6px 0 rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14132B; --paper:#1F1E3D; --ink:#F1F0FF; --ink-soft:#B3B1DA; --line:#34335C;
+  --pink-tint:#43233A; --sun-tint:#3F3720; --mint-tint:#1B3A35; --cobalt-tint:#262A5C; --lilac-tint:#2E2858;
+  --field:#2A2950; --field-line:#6C73D6; --term-bg:#0F0E24; --shadow:0 6px 0 rgba(0,0,0,.35);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Lexend,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.55;
+  background-image:radial-gradient(var(--line) 1.4px,transparent 1.4px);background-size:22px 22px}
+h1,h2,h3{font-family:Fredoka,"Arial Rounded MT Bold","Trebuchet MS",sans-serif;line-height:1.15;margin:0}
+code,.mono{font-family:"IBM Plex Mono",Menlo,Consolas,monospace}
+.sheet{max-width:1080px;margin:28px auto;padding:0 16px}
+section{margin:0 0 30px}
+:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px;border-radius:6px}
+
+/* ---------- hero ---------- */
+.hero{position:relative;background:var(--cobalt);color:#fff;border-radius:34px 34px 34px 8px;padding:34px 34px 30px;overflow:hidden;box-shadow:var(--shadow)}
+.hero .blob{position:absolute;border-radius:50%}
+.hero .b1{width:230px;height:230px;background:var(--pink);right:-60px;top:-80px}
+.hero .b2{width:120px;height:120px;background:var(--sun);right:160px;bottom:-60px}
+.hero .b3{width:46px;height:46px;background:var(--mint);right:120px;top:36px}
+.hero-grid{position:relative;display:grid;grid-template-columns:1.3fr 1fr;gap:20px;align-items:center}
+.hero h1{font-size:clamp(2.3rem,6vw,4rem);font-weight:700;letter-spacing:-.5px}
+.hero h1 .wiggle{display:inline-block;transform:rotate(-3deg);background:var(--sun);color:var(--ink);padding:0 .25em;border-radius:14px;margin-top:6px}
+.hero p.sub{font-size:1.1rem;margin:14px 0 0;max-width:44ch;opacity:.95}
+.hero svg{width:100%;height:auto;max-width:360px;justify-self:end}
+.idcard{position:relative;margin-top:24px;display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;background:rgba(255,255,255,.14);border-radius:18px;padding:12px 14px}
+.idcard label{font-family:Fredoka,sans-serif;font-size:.95rem;display:flex;flex-direction:column;gap:2px}
+.idcard input{background:rgba(255,255,255,.92);border:0;border-radius:10px;padding:8px 10px;font:inherit;font-family:Lexend,sans-serif;color:#23224A}
+.legend{position:relative;display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;align-items:center;font-size:.95rem}
+.tier{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 12px 3px 4px;font-family:Fredoka,sans-serif;font-weight:600;font-size:.9rem;color:#23224A;white-space:nowrap}
+.tier i{font-style:normal;background:#fff;border-radius:999px;width:22px;height:22px;display:grid;place-items:center;font-size:.8rem}
+.t1{background:var(--sun)} .t2{background:var(--pink)}
+
+/* ---------- section titles ---------- */
+.stitle{display:flex;align-items:center;gap:12px;margin:0 0 14px}
+.stitle .dot{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:1.4rem;transform:rotate(-6deg);box-shadow:var(--shadow);flex:none}
+.stitle h2{font-size:clamp(1.5rem,3.4vw,2rem)}
+.stitle p{margin:2px 0 0;color:var(--ink-soft);font-size:.95rem}
+.panel{background:var(--paper);border-radius:26px;padding:22px;box-shadow:var(--shadow)}
+
+/* ---------- inputs ---------- */
+input.fill,textarea.fill{font:inherit;color:var(--ink);background:var(--field);border:0;border-bottom:2.5px dashed var(--field-line);border-radius:10px 10px 4px 4px;padding:7px 10px;width:100%}
+textarea.fill{min-height:74px;resize:vertical;border:2.5px dashed var(--field-line);border-radius:14px;line-height:1.5}
+input.fill:focus,textarea.fill:focus{border-color:var(--cobalt);border-style:solid;outline:none;background:var(--cobalt-tint)}
+.q{margin:12px 0 0}
+.q .qtext{display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;font-weight:500}
+.q .qtext .tier{margin-top:1px}
+
+/* ---------- setup diagram ---------- */
+.setup{display:grid;grid-template-columns:1.2fr 1fr;gap:22px;align-items:center}
+.setup svg{width:100%;height:auto}
+#swDoodle{cursor:pointer}
+#swDoodle .led{transition:fill .2s}
+.numlist{display:grid;gap:10px}
+.numlist label{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:center}
+.numlist label .n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-family:Fredoka,sans-serif;font-weight:700;color:#23224A}
+.numlist label span.t{display:block;font-size:.9rem;color:var(--ink-soft);margin-bottom:2px}
+
+/* ---------- mode stairs ---------- */
+.stairs{display:grid;gap:10px}
+.stair{display:grid;grid-template-columns:minmax(170px,230px) 1fr 1fr;gap:12px;align-items:end;border-radius:18px;padding:12px 14px;color:#23224A}
+.stair:nth-child(1){background:var(--mint);margin-right:0}
+.stair:nth-child(2){background:var(--sun);margin-left:4%}
+.stair:nth-child(3){background:var(--pink);margin-left:8%}
+.stair:nth-child(4){background:var(--lilac);margin-left:12%}
+.stair:nth-child(5){background:#8FD3FF;margin-left:12%}
+.stair .prompt{font-family:"IBM Plex Mono",monospace;font-weight:600;background:#1B1A3A;color:#E8E6FF;border-radius:10px;padding:8px 10px;align-self:center;font-size:.95rem;white-space:nowrap;overflow-x:auto}
+.stair label{font-size:.85rem;font-family:Fredoka,sans-serif;font-weight:500}
+.stair input.fill{background:rgba(255,255,255,.75);color:#23224A;border-bottom-color:#23224A}
+.stair input.fill:focus{background:#fff}
+.given{font-family:"IBM Plex Mono",monospace;font-size:.9rem;background:rgba(255,255,255,.6);border-radius:8px;padding:7px 10px;display:block}
+
+/* ---------- roadmap ---------- */
+.road{position:relative;display:grid;gap:18px;padding-left:0}
+.road::before{content:"";position:absolute;left:31px;top:20px;bottom:20px;border-left:5px dotted var(--lilac)}
+.stop{position:relative;display:grid;grid-template-columns:64px 1fr;gap:16px}
+.stop .num{width:64px;height:64px;border-radius:22px;display:grid;place-items:center;font-family:Fredoka,sans-serif;font-weight:700;font-size:1.8rem;color:#23224A;box-shadow:var(--shadow);position:relative;z-index:1}
+.stop:nth-child(4n+1) .num{background:var(--sun);transform:rotate(-5deg)}
+.stop:nth-child(4n+2) .num{background:var(--pink);transform:rotate(4deg)}
+.stop:nth-child(4n+3) .num{background:var(--mint);transform:rotate(-3deg)}
+.stop:nth-child(4n+4) .num{background:var(--lilac);transform:rotate(6deg)}
+.stop .card{background:var(--paper);border-radius:8px 26px 26px 26px;padding:18px 20px;box-shadow:var(--shadow)}
+.stop h3{font-size:1.35rem;margin-bottom:10px}
+.cmd{background:var(--term-bg);color:var(--term-fg);border-radius:14px;padding:12px 14px;font-family:"IBM Plex Mono",monospace;font-size:.92rem;overflow-x:auto}
+.cmd .row{display:flex;align-items:center;gap:6px;min-height:34px;white-space:nowrap}
+.cmd .p{color:var(--term-dim)}
+.cmd input.blank{font:inherit;color:#FFE27A;background:rgba(255,255,255,.08);border:0;border-bottom:2px dashed #FFE27A;border-radius:6px 6px 2px 2px;padding:3px 6px;width:var(--w,16ch);min-width:6ch}
+.cmd input.blank:focus{outline:none;background:rgba(255,226,122,.16);border-bottom-style:solid}
+.cmd .note{color:var(--term-dim);font-family:Lexend,sans-serif;font-size:.8rem;margin-left:6px}
+.inline-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:4px}
+.inline-fields label{font-size:.88rem;color:var(--ink-soft)}
+
+/* ---------- transport notes ---------- */
+.notes{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.sticky{border-radius:4px 4px 22px 4px;padding:16px 14px 14px;color:#23224A;box-shadow:var(--shadow);position:relative}
+.sticky:nth-child(1){background:var(--sun);transform:rotate(-2deg)}
+.sticky:nth-child(2){background:var(--pink);transform:rotate(1.5deg)}
+.sticky:nth-child(3){background:var(--mint);transform:rotate(-1deg)}
+.sticky:nth-child(4){background:var(--lilac);transform:rotate(2deg)}
+.sticky::before{content:"";position:absolute;top:-10px;left:50%;width:70px;height:20px;margin-left:-35px;background:rgba(255,255,255,.6);transform:rotate(-3deg)}
+.sticky .kw{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:1.25rem}
+.sticky textarea.fill{background:rgba(255,255,255,.7);color:#23224A;border-color:rgba(35,34,74,.45);min-height:64px;margin-top:8px}
+
+/* ---------- venn ---------- */
+.venn{display:grid;grid-template-columns:1fr .8fr 1fr;gap:0;align-items:stretch}
+.venn .side{padding:22px 26px;color:#23224A;display:grid;gap:10px;align-content:start}
+.venn .left{background:var(--pink);border-radius:200px 40px 40px 200px / 160px 40px 40px 160px;padding-left:44px}
+.venn .right{background:var(--mint);border-radius:40px 200px 200px 40px / 40px 160px 160px 40px;padding-right:44px}
+.venn .mid{background:var(--lilac);padding:22px 16px;color:#23224A;display:grid;gap:8px;align-content:center;text-align:center}
+.venn h3{font-size:1.2rem}
+.venn label{font-size:.88rem;font-weight:500}
+.venn input.fill,.venn textarea.fill{background:rgba(255,255,255,.75);color:#23224A;border-color:rgba(35,34,74,.5)}
+
+/* ---------- detective ---------- */
+.detective{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.showrun{background:var(--term-bg);color:var(--term-fg);font-family:"IBM Plex Mono",monospace;font-size:.88rem;border-radius:18px;padding:16px;white-space:pre;overflow-x:auto;line-height:1.5}
+.showrun mark{background:var(--sun);color:#23224A;border-radius:4px;padding:0 3px}
+
+/* ---------- terminal lab ---------- */
+.lab{display:grid;grid-template-columns:1fr 290px;gap:20px;align-items:start}
+.window{background:var(--term-bg);border-radius:22px;overflow:hidden;box-shadow:0 10px 0 var(--cobalt);border:3px solid var(--cobalt)}
+.titlebar{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--cobalt)}
+.titlebar .lights{display:flex;gap:6px}
+.titlebar .lights span{width:12px;height:12px;border-radius:50%;background:var(--pink)}
+.titlebar .lights span:nth-child(2){background:var(--sun)} .titlebar .lights span:nth-child(3){background:var(--mint)}
+.tabs{display:flex;gap:6px;margin-left:8px;flex-wrap:wrap}
+.tabs button{font-family:Fredoka,sans-serif;font-weight:600;font-size:.95rem;border:0;border-radius:10px;padding:6px 12px;cursor:pointer;background:rgba(255,255,255,.18);color:#fff}
+.tabs button[aria-selected="true"]{background:#fff;color:#23224A}
+.pane{display:none}
+.pane.on{display:block}
+.ipcfg{display:flex;flex-wrap:wrap;gap:10px;align-items:end;padding:12px 14px;background:#26244F;color:#E8E6FF;border-bottom:1px solid #3A3870;font-size:.85rem}
+.ipcfg label{display:flex;flex-direction:column;gap:3px;font-family:Fredoka,sans-serif}
+.ipcfg input{font-family:"IBM Plex Mono",monospace;font-size:.9rem;background:#1B1A3A;border:2px solid #4A48A0;color:#E8E6FF;border-radius:8px;padding:5px 8px;width:150px}
+.ipcfg input:focus{outline:none;border-color:var(--sun)}
+.ipcfg .status{font-family:Lexend,sans-serif;font-size:.8rem;color:var(--term-dim);flex-basis:100%}
+.term{height:400px;overflow-y:auto;padding:14px 16px;font-family:"IBM Plex Mono",Menlo,Consolas,monospace;font-size:.9rem;color:var(--term-fg);line-height:1.45;cursor:text}
+.term .tl{white-space:pre-wrap;word-break:break-word;min-height:1.45em}
+.term .tl.dim{color:var(--term-dim)} .term .tl.ok{color:var(--term-ok)} .term .tl.warn{color:var(--term-warn)}
+.term .more{display:inline-block;background:var(--term-fg);color:var(--term-bg);padding:0 6px;cursor:pointer}
+.term .inrow{display:flex;align-items:baseline}
+.term .inrow .pr{white-space:pre}
+.term .inrow input{flex:1;min-width:30px;background:transparent;border:0;color:var(--term-fg);font:inherit;padding:0;caret-color:var(--term-ok)}
+.term .inrow input:focus{outline:none}
+.term .inrow.hide{display:none}
+.tips{color:var(--ink-soft);font-size:.9rem;margin:16px 4px 0}
+.tips code{background:var(--cobalt-tint);border-radius:6px;padding:1px 6px;color:var(--ink)}
+.missions{background:var(--paper);border-radius:26px;padding:18px;box-shadow:var(--shadow)}
+.missions h3{font-size:1.25rem;margin-bottom:4px}
+.missions p{margin:0 0 10px;font-size:.88rem;color:var(--ink-soft)}
+.missions ol{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+.missions li{display:grid;grid-template-columns:26px 1fr;gap:8px;align-items:start;font-size:.9rem}
+.missions li .box{width:24px;height:24px;border-radius:8px;border:2.5px solid var(--lilac);display:grid;place-items:center;font-size:.8rem;font-weight:700;color:#23224A;transition:background .2s}
+.missions li.done .box{background:var(--mint);border-color:var(--mint)}
+.missions li.done span.txt{text-decoration:line-through;text-decoration-color:var(--mint);text-decoration-thickness:2px;color:var(--ink-soft)}
+.bar{height:12px;border-radius:999px;background:var(--cobalt-tint);overflow:hidden;margin:12px 0 2px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--mint),var(--cobalt));transition:width .4s}
+.btn{font-family:Fredoka,sans-serif;font-weight:600;font-size:1rem;border:0;border-radius:14px;padding:10px 16px;cursor:pointer;box-shadow:0 4px 0 rgba(35,34,74,.25);color:#23224A}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(35,34,74,.25)}
+.btn.sun{background:var(--sun)} .btn.pink{background:var(--pink)} .btn.mint{background:var(--mint)} .btn.ghost{background:var(--cobalt-tint);color:var(--ink)}
+
+/* ---------- 321 ---------- */
+.ticket{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.ticket .col{border-radius:24px;padding:16px;color:#23224A}
+.ticket .col:nth-child(1){background:var(--sun)} .ticket .col:nth-child(2){background:var(--pink)} .ticket .col:nth-child(3){background:var(--mint)}
+.ticket .big{font-family:Fredoka,sans-serif;font-weight:700;font-size:2.6rem;line-height:1}
+.ticket input.fill,.ticket textarea.fill{background:rgba(255,255,255,.75);color:#23224A;border-color:rgba(35,34,74,.5);margin-top:8px}
+
+/* ---------- footer / eggs ---------- */
+.foot{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;background:var(--paper);border-radius:22px;padding:14px 18px;box-shadow:var(--shadow)}
+.eggs{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eggs .shells{display:flex;gap:4px}
+.eggs .shells span{width:18px;height:23px;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;background:var(--cobalt-tint);border:2px solid var(--lilac)}
+.eggs .shells span.got{background:var(--sun);border-color:var(--pink)}
+.hint{font-size:.9rem;color:var(--ink-soft);flex-basis:100%;margin:0;min-height:1.2em}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(140%);background:var(--ink);color:var(--paper);font-family:Fredoka,sans-serif;font-size:1.05rem;padding:12px 18px;border-radius:16px;z-index:50;transition:transform .35s;max-width:min(92vw,520px);text-align:center;box-shadow:0 8px 0 var(--pink)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.confetti{position:fixed;top:-20px;width:10px;height:14px;z-index:60;pointer-events:none;border-radius:3px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.rainbow .led{animation:rb .6s steps(4) infinite}
+@keyframes rb{0%{fill:#FF7AB6}25%{fill:#FFC93C}50%{fill:#2FCBA8}75%{fill:#4B5BFF}}
+.secret{color:var(--bg);font-size:.7rem;text-align:center;margin-top:10px;user-select:all}
+.print-only{display:none}
+
+@media (max-width:860px){
+  .hero-grid,.setup,.detective,.lab{grid-template-columns:1fr}
+  .hero svg{justify-self:center;max-width:280px}
+  .notes{grid-template-columns:1fr 1fr}
+  .venn{grid-template-columns:1fr}
+  .venn .left,.venn .right{border-radius:28px;padding:20px}
+  .venn .mid{border-radius:0}
+  .ticket{grid-template-columns:1fr}
+  .stair{grid-template-columns:1fr;margin-left:0!important}
+}
+@media (max-width:560px){
+  .idcard{grid-template-columns:1fr 1fr}
+  .idcard label:first-child{grid-column:1/-1}
+  .stop{grid-template-columns:1fr}
+  .road::before{display:none}
+  .stop .num{width:52px;height:52px;font-size:1.5rem}
+  .notes{grid-template-columns:1fr}
+  .hero{padding:26px 20px}
+  .term{height:340px;font-size:.82rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+@media print{
+  body{background:#fff}
+  .no-print,.lab .window,.tips,.foot,.toast{display:none!important}
+  .lab{grid-template-columns:1fr}
+  .print-only{display:block}
+  .panel,.stop .card,.missions,.window{box-shadow:none;border:1.5px solid #ccc}
+  section{break-inside:avoid-page}
+  .stop{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+  <div class="hero-grid">
+    <div>
+      <h1>Let's Telnet!<br><span class="wiggle">VTY lines on a switch</span></h1>
+      <p class="sub">Fill this in while you watch. Pause the video whenever you need to — then try every command yourself in the practice terminal at the bottom.</p>
+    </div>
+    <svg viewBox="0 0 360 200" role="img" aria-label="Doodle of a PC remotely controlling a switch">
+      <rect x="18" y="40" width="120" height="84" rx="14" fill="#fff"/>
+      <rect x="28" y="50" width="100" height="62" rx="8" fill="#1B1A3A"/>
+      <text x="38" y="74" font-family="IBM Plex Mono,monospace" font-size="12" fill="#7CF2C9">C:\&gt; telnet</text>
+      <rect x="38" y="84" width="9" height="13" fill="#FFC93C"><animate attributeName="opacity" values="1;0;1" dur="1.1s" repeatCount="indefinite"/></rect>
+      <rect x="64" y="124" width="28" height="16" fill="#fff"/><rect x="46" y="138" width="64" height="9" rx="4" fill="#fff"/>
+      <path d="M140 92 C 200 30, 220 160, 268 110" stroke="#FFC93C" stroke-width="5" fill="none" stroke-dasharray="2 10" stroke-linecap="round"/>
+      <rect x="214" y="104" width="134" height="48" rx="12" fill="#fff"/>
+      <g fill="#2FCBA8"><circle cx="234" cy="128" r="5"/><circle cx="250" cy="128" r="5"/><circle cx="266" cy="128" r="5"/></g>
+      <g fill="#C9CEF5"><rect x="284" y="120" width="12" height="16" rx="2"/><rect x="300" y="120" width="12" height="16" rx="2"/><rect x="316" y="120" width="12" height="16" rx="2"/></g>
+      <text x="230" y="172" font-family="Fredoka,sans-serif" font-size="15" fill="#fff">2960 switch</text>
+      <text x="22" y="30" font-family="Fredoka,sans-serif" font-size="15" fill="#fff">PC</text>
+    </svg>
+  </div>
+  <div class="idcard">
+    <label>Name <input data-k="name" id="nameField" autocomplete="off"></label>
+    <label>Date <input data-k="date" autocomplete="off"></label>
+    <label>Period <input data-k="period" autocomplete="off"></label>
+  </div>
+  <div class="legend">
+    <span class="tier t1"><i>1</i>Tier 1 · Recall it</span>
+    <span class="tier t2"><i>2</i>Tier 2 · Explain it</span>
+    <span style="opacity:.9">Recall it = find it in the video. Explain it = tell me why or how, in your own words.</span>
+  </div>
+</header>
+
+<!-- ================= SETUP ================= -->
+<section style="margin-top:34px">
+  <div class="stitle"><div class="dot" style="background:var(--sun)">🧩</div><div><h2>Meet the network</h2><p>Watch the first minute. Fill in each numbered bubble.</p></div></div>
+  <div class="panel setup">
+    <svg viewBox="0 0 560 240" role="img" aria-label="Diagram: PC connected by a cable to a switch, with numbered labels">
+      <!-- PC -->
+      <rect x="20" y="40" width="130" height="92" rx="14" fill="var(--cobalt-tint)" stroke="var(--cobalt)" stroke-width="3"/>
+      <rect x="34" y="54" width="102" height="62" rx="8" fill="#1B1A3A"/>
+      <rect x="70" y="132" width="30" height="18" fill="var(--cobalt)"/><rect x="48" y="148" width="74" height="10" rx="5" fill="var(--cobalt)"/>
+      <text x="85" y="91" text-anchor="middle" font-family="Fredoka,sans-serif" font-size="20" fill="#E8E6FF">PC</text>
+      <!-- cable -->
+      <path d="M150 100 C 230 100, 260 160, 352 160" stroke="var(--pink)" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <!-- switch -->
+      <g id="swDoodle" tabindex="0" role="button" aria-label="Switch">
+        <rect x="340" y="132" width="200" height="58" rx="12" fill="var(--mint-tint)" stroke="var(--mint)" stroke-width="3"/>
+        <g class="leds">
+          <circle class="led" cx="362" cy="161" r="6" fill="var(--mint)"/>
+          <circle class="led" cx="380" cy="161" r="6" fill="var(--mint)"/>
+        </g>
+        <g fill="var(--line)"><rect x="400" y="152" width="14" height="18" rx="2"/><rect x="418" y="152" width="14" height="18" rx="2"/><rect x="436" y="152" width="14" height="18" rx="2"/><rect x="454" y="152" width="14" height="18" rx="2"/><rect x="472" y="152" width="14" height="18" rx="2"/><rect x="490" y="152" width="14" height="18" rx="2"/><rect x="508" y="152" width="14" height="18" rx="2"/></g>
+      </g>
+      <!-- bubbles -->
+      <g font-family="Fredoka,sans-serif" font-weight="700" font-size="16" text-anchor="middle" fill="#23224A">
+        <circle cx="440" cy="110" r="16" fill="var(--sun)"/><text x="440" y="116">1</text>
+        <circle cx="240" cy="108" r="16" fill="var(--pink)"/><text x="240" y="114">2</text>
+        <circle cx="170" cy="72" r="16" fill="var(--lilac)"/><text x="170" y="78">3</text>
+        <circle cx="330" cy="212" r="16" fill="var(--lilac)"/><text x="330" y="218">4</text>
+        <circle cx="500" cy="212" r="16" fill="var(--mint)"/><text x="500" y="218">5</text>
+        <circle cx="85" cy="186" r="16" fill="var(--mint)"/><text x="85" y="192">6</text>
+        <circle cx="85" cy="22" r="16" fill="var(--cobalt)"/><text x="85" y="28" fill="#fff">7</text>
+      </g>
+    </svg>
+    <div class="numlist">
+      <label><span class="n" style="background:var(--sun)">1</span><span><span class="t">Switch model number</span><input class="fill" data-k="su1"></span></label>
+      <label><span class="n" style="background:var(--pink)">2</span><span><span class="t">Type of cable</span><input class="fill" data-k="su2"></span></label>
+      <label><span class="n" style="background:var(--lilac)">3</span><span><span class="t">Port the cable uses on the PC</span><input class="fill" data-k="su3"></span></label>
+      <label><span class="n" style="background:var(--lilac)">4</span><span><span class="t">Port the cable uses on the switch</span><input class="fill" data-k="su4"></span></label>
+      <label><span class="n" style="background:var(--mint)">5</span><span><span class="t">Switch IP address (on VLAN 1)</span><input class="fill" data-k="su5"></span></label>
+      <label><span class="n" style="background:var(--mint)">6</span><span><span class="t">PC IP address</span><input class="fill" data-k="su6"></span></label>
+      <label><span class="n" style="background:var(--cobalt);color:#fff">7</span><span><span class="t">Subnet mask both devices use</span><input class="fill" data-k="su7"></span></label>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MODE STAIRS ================= -->
+<section>
+  <div class="stitle"><div class="dot" style="background:var(--pink)">🪜</div><div><h2>Climb the mode stairs</h2><p>The prompt tells you where you are. Name each mode and the command that gets you there.</p></div></div>
+  <div class="panel">
+    <div class="stairs">
+      <div class="stair"><div class="prompt">Switch&gt;</div>
+        <label>Mode name<span class="given">Where you start when you click CLI</span></label>
+        <label>Command to climb to the next step <input class="fill" data-k="ms1"></label></div>
+      <div class="stair"><div class="prompt">Switch#</div>
+        <label>Mode name <input class="fill" data-k="ms2a"></label>
+        <label>Command to climb to the next step <input class="fill" data-k="ms2b"></label></div>
+      <div class="stair"><div class="prompt">Switch(config)#</div>
+        <label>Mode name <input class="fill" data-k="ms3a"></label>
+        <label>Shortcut the narrator used to get here <input class="fill" data-k="ms3b"></label></div>
+      <div class="stair"><div class="prompt">Switch(config-if)#</div>
+        <label>What are you inside of? <input class="fill" data-k="ms4a"></label>
+        <label>Command that got you here <input class="fill" data-k="ms4b"></label></div>
+      <div class="stair"><div class="prompt">Switch(config-line)#</div>
+        <label>What are you inside of? <input class="fill" data-k="ms5a"></label>
+        <label>Command that got you here <input class="fill" data-k="ms5b"></label></div>
+    </div>
+    <div class="q"><div class="qtext"><span class="tier t1"><i>1</i>Recall</span>The shortcut <code>conf t</code> is short for two words. What does each part stand for?</div>
+      <div class="inline-fields"><label>conf = <input class="fill" data-k="msq1a"></label><label>t = <input class="fill" data-k="msq1b"></label></div></div>
+  </div>
+</section>
+
+<!-- ================= ROADMAP ================= -->
+<section>
+  <div class="stitle"><div class="dot" style="background:var(--mint)">🗺️</div><div><h2>The 8-step roadmap</h2><p>Type the missing commands into the yellow blanks, then answer the questions.</p></div></div>
+  <div class="road">
+
+    <div class="stop"><div class="num">1</div><div class="card">
+      <h3>Give the switch an IP address</h3>
+      <div class="cmd">
+        <div class="row"><span class="p">Switch&gt;</span><input class="blank" data-k="r1a" style="--w:12ch"></div>
+        <div class="row"><span class="p">Switch#</span><input class="blank" data-k="r1b" style="--w:22ch"></div>
+        <div class="row"><span class="p">Switch(config)#</span><input class="blank" data-k="r1c" style="--w:20ch"></div>
+        <div class="row"><span class="p">Switch(config-if)#</span>ip address<input class="blank" data-k="r1d" style="--w:15ch"><input class="blank" data-k="r1e" style="--w:16ch"></div>
+        <div class="row"><span class="p">Switch(config-if)#</span><input class="blank" data-k="r1f" style="--w:14ch"><span class="note">turns it on</span></div>
+        <div class="row"><span class="p">Switch(config-if)#</span><input class="blank" data-k="r1g" style="--w:12ch"><span class="note">saves it</span></div>
+      </div>
+      <div class="q"><div class="qtext"><span class="tier t1"><i>1</i>Recall</span>Before the narrator turned it on, what state was the VLAN 1 interface in?</div><input class="fill" data-k="r1q1"></div>
+      <div class="q"><div class="qtext"><span class="tier t2"><i>2</i>Explain</span>In your own words, why did the narrator need to type the "turns it on" command?</div><textarea class="fill" data-k="r1q2"></textarea></div>
+    </div></div>
+
+    <div class="stop"><div class="num">2</div><div class="card">
+      <h3>Give the PC an IP address</h3>
+      <div class="inline-fields">
+        <label>Click PC → Desktop → <input class="fill" data-k="r2a"></label>
+        <label>IPv4 address <input class="fill" data-k="r2b"></label>
+        <label>Subnet mask <input class="fill" data-k="r2c"></label>
+        <label>Default gateway <input class="fill" data-k="r2d"></label>
+      </div>
+      <div class="q"><div class="qtext"><span class="tier t2"><i>2</i>Explain</span>Why didn't this lab need a default gateway?</div><textarea class="fill" data-k="r2q1"></textarea></div>
+    </div></div>
+
+    <div class="stop"><div class="num">3</div><div class="card">
+      <h3>Ping the switch from the PC</h3>
+      <div class="cmd"><div class="row"><span class="p">C:\&gt;</span><input class="blank" data-k="r3a" style="--w:22ch"></div></div>
+      <div class="q"><div class="qtext"><span class="tier t1"><i>1</i>Recall</span>What message showed up on the very first try?</div><input class="fill" data-k="r3q1"></div>
+      <div class="q"><div class="qtext"><span class="tier t2"><i>2</i>Explain</span>Why did the first try fail but the next ones worked? Use the word ARP in your answer.</div><textarea class="fill" data-k="r3q2"></textarea></div>
+    </div></div>
+
+    <div class="stop"><div class="num">4</div><div class="card">
+      <h3>Create an enable password</h3>
+      <div class="cmd">
+        <div class="row"><span class="p">Switch#</span><input class="blank" data-k="r4a" style="--w:10ch"><span class="note">the shortcut</span></div>
+        <div class="row"><span class="p">Switch(config)#</span><input class="blank" data-k="r4b" style="--w:18ch"><input class="blank" data-k="r4c" style="--w:16ch"></div>
+      </div>
+      <div class="q"><div class="qtext"><span class="tier t1"><i>1</i>Recall</span>Which mode must you be in to create the enable password?</div><input class="fill" data-k="r4q1"></div>
+    </div></div>
+
+    <div class="stop"><div class="num">5</div><div class="card">
+      <h3>Create a local username and password</h3>
+      <div class="cmd"><div class="row"><span class="p">Switch(config)#</span>username<input class="blank" data-k="r5a" style="--w:10ch">password<input class="blank" data-k="r5b" style="--w:16ch"></div></div>
+      <div class="q"><div class="qtext"><span class="tier t1"><i>1</i>Recall</span>How is this password different from the enable password? (Look closely at the numbers!)</div><input class="fill" data-k="r5q1"></div>
+    </div></div>
+
+    <div class="stop"><div class="num">6</div><div class="card">
+      <h3>Apply the login to every VTY line</h3>
+      <div class="cmd">
+        <div class="row"><span class="p">Switch(config)#</span><input class="blank" data-k="r6a" style="--w:18ch"></div>
+        <div class="row"><span class="p">Switch(config-line)#</span><input class="blank" data-k="r6b" style="--w:14ch"></div>
+      </div>
+      <div class="q"><div class="qtext"><span class="tier t1"><i>1</i>Recall</span>In <code>login local</code>, what does the word "local" link to the VTY lines?</div><input class="fill" data-k="r6q1"></div>
+      <div class="q"><div class="qtext"><span class="tier t2"><i>2</i>Explain</span>The narrator said he could have typed 0 to 4. Why did he type 0 to 15 instead?</div><textarea class="fill" data-k="r6q2"></textarea></div>
+    </div></div>
+
+    <div class="stop"><div class="num">7</div><div class="card">
+      <h3>Turn on Telnet for the VTY lines</h3>
+      <div class="cmd">
+        <div class="row"><span class="p">Switch(config-line)#</span>transport input<input class="blank" data-k="r7a" style="--w:10ch"></div>
+        <div class="row"><span class="p">Switch(config-line)#</span><input class="blank" data-k="r7b" style="--w:12ch"><span class="note">saves it</span></div>
+      </div>
+      <div class="q"><div class="qtext"><span class="tier t1"><i>1</i>Recall</span>Forgot a command? What can you type to see the list of commands you're allowed to use?</div><input class="fill" data-k="r7q1"></div>
+    </div></div>
+
+    <div class="stop"><div class="num">8</div><div class="card">
+      <h3>Test Telnet from the PC</h3>
+      <div class="cmd">
+        <div class="row"><span class="p">C:\&gt;</span><input class="blank" data-k="r8a" style="--w:10ch">192.168.1.3</div>
+        <div class="row"><span class="p">Username:</span><input class="blank" data-k="r8b" style="--w:12ch"></div>
+        <div class="row"><span class="p">Password:</span><input class="blank" data-k="r8c" style="--w:16ch"><span class="note">which password is this?</span></div>
+        <div class="row"><span class="p">Switch&gt;</span><input class="blank" data-k="r8d" style="--w:10ch"></div>
+        <div class="row"><span class="p">Password:</span><input class="blank" data-k="r8e" style="--w:16ch"><span class="note">and this one?</span></div>
+        <div class="row"><span class="p">Switch#</span><input class="blank" data-k="r8f" style="--w:22ch"><span class="note">or its shortcut</span></div>
+      </div>
+      <div class="q"><div class="qtext"><span class="tier t1"><i>1</i>Recall</span>What key did the narrator keep pressing to see more of the running configuration?</div><input class="fill" data-k="r8q1"></div>
+    </div></div>
+
+  </div>
+</section>
+
+<!-- ================= TRANSPORT ================= -->
+<section>
+  <div class="stitle"><div class="dot" style="background:var(--lilac)">🔌</div><div><h2>Transport input options</h2><p>When the narrator typed <code>?</code> after transport, four choices popped up. What does each one turn on?</p></div></div>
+  <div class="notes">
+    <div class="sticky"><div class="kw">all</div><textarea class="fill" data-k="tp1" aria-label="all"></textarea></div>
+    <div class="sticky"><div class="kw">none</div><textarea class="fill" data-k="tp2" aria-label="none"></textarea></div>
+    <div class="sticky"><div class="kw">ssh</div><textarea class="fill" data-k="tp3" aria-label="ssh"></textarea></div>
+    <div class="sticky"><div class="kw">telnet</div><textarea class="fill" data-k="tp4" aria-label="telnet"></textarea></div>
+  </div>
+  <div class="panel q" style="margin-top:22px"><div class="qtext"><span class="tier t1"><i>1</i>Recall</span>Which one did the instructions tell us to pick?</div><input class="fill" data-k="tp5"></div>
+</section>
+
+<!-- ================= VENN ================= -->
+<section>
+  <div class="stitle"><div class="dot" style="background:var(--sun)">🔐</div><div><h2>Password showdown</h2><p>The switch now has two different passwords. Compare them.</p></div></div>
+  <div class="venn">
+    <div class="side left">
+      <h3>Enable password</h3>
+      <label>Command used <input class="fill" data-k="vn1"></label>
+      <label>The password in the video <input class="fill" data-k="vn2"></label>
+      <label>During Telnet, when does the switch ask for it? <textarea class="fill" data-k="vn3"></textarea></label>
+    </div>
+    <div class="mid">
+      <h3>Both</h3>
+      <span class="tier t2" style="justify-self:center"><i>2</i>Explain</span>
+      <label>What do these two passwords have in common? <textarea class="fill" data-k="vn4" style="min-height:120px"></textarea></label>
+    </div>
+    <div class="side right">
+      <h3>Local username &amp; password</h3>
+      <label>Command used <input class="fill" data-k="vn5"></label>
+      <label>The username and password in the video <input class="fill" data-k="vn6"></label>
+      <label>During Telnet, when does the switch ask for it? <textarea class="fill" data-k="vn7"></textarea></label>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DETECTIVE ================= -->
+<section>
+  <div class="stitle"><div class="dot" style="background:var(--pink)">🔎</div><div><h2>Running-config detective</h2><p>Here's part of what showed up when the narrator ran <code>show run</code> at the end.</p></div></div>
+  <div class="detective">
+<div class="showrun">hostname Switch
+!
+enable password password1234
+!
+username admin <mark>privilege 1</mark> password 0 password12345
+!
+interface Vlan1
+ ip address 192.168.1.3 255.255.255.0
+!
+<mark>line vty 0 4</mark>
+ login local
+ transport input telnet
+<mark>line vty 5 15</mark>
+ login local
+ transport input telnet
+!
+end</div>
+    <div class="panel">
+      <div class="q" style="margin-top:0"><div class="qtext"><span class="tier t1"><i>1</i>Recall</span>The username line has a word we never typed. What is it? What did the narrator say about it?</div><textarea class="fill" data-k="dt1"></textarea></div>
+      <div class="q"><div class="qtext"><span class="tier t2"><i>2</i>Explain</span>We typed <code>line vty 0 15</code> only once. Why does the config show two VTY sections, and why do both have <code>login local</code>?</div><textarea class="fill" data-k="dt2"></textarea></div>
+      <div class="q"><div class="qtext"><span class="tier t1"><i>1</i>Recall</span>What's the long form of the command <code>show run</code>?</div><input class="fill" data-k="dt3"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TERMINAL LAB ================= -->
+<section>
+  <div class="stitle"><div class="dot" style="background:var(--mint)">💻</div><div><h2>Your turn: practice terminal</h2><p>A pretend switch and PC, wired up just like the video. Type the commands and watch what happens. Nothing you break here is real.</p></div></div>
+  <div class="lab">
+    <div>
+      <div class="window">
+        <div class="titlebar">
+          <div class="lights"><span></span><span></span><span></span></div>
+          <div class="tabs" role="tablist">
+            <button role="tab" aria-selected="true" data-pane="swPane" id="tabSw">Switch CLI</button>
+            <button role="tab" aria-selected="false" data-pane="pcPane" id="tabPc">PC</button>
+          </div>
+        </div>
+        <div class="pane on" id="swPane" role="tabpanel">
+          <div class="term" id="swTerm" aria-live="polite">
+            <div class="out"></div>
+            <div class="inrow"><span class="pr"></span><input aria-label="Switch command line" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+          </div>
+        </div>
+        <div class="pane" id="pcPane" role="tabpanel">
+          <div class="ipcfg">
+            <label>IPv4 address <input id="pcIp" placeholder="0.0.0.0" autocomplete="off"></label>
+            <label>Subnet mask <input id="pcMask" placeholder="0.0.0.0" autocomplete="off"></label>
+            <label>Default gateway <input id="pcGw" placeholder="leave empty" autocomplete="off"></label>
+            <div class="status" id="pcStatus">Desktop → IP Configuration. Fill this in, then use the command prompt below.</div>
+          </div>
+          <div class="term" id="pcTerm" aria-live="polite">
+            <div class="out"></div>
+            <div class="inrow"><span class="pr"></span><input aria-label="PC command prompt" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+          </div>
+        </div>
+      </div>
+      <p class="tips">Type <code>?</code> for help. Press <code>↑</code> to bring back your last command. Shortcuts like <code>en</code>, <code>conf t</code> and <code>int vlan 1</code> work, just like in the video.</p>
+      <p class="print-only">(Practice terminal works on screen only.)</p>
+    </div>
+    <aside class="missions">
+      <h3>Mission checklist</h3>
+      <p>These tick themselves off as you go.</p>
+      <ol id="missionList"></ol>
+      <div class="bar"><i id="missionBar"></i></div>
+      <p id="missionCount" style="margin:0">0 of 10 done</p>
+      <button class="btn ghost no-print" id="resetLab" style="margin-top:10px;width:100%">Reset the practice switch</button>
+    </aside>
+  </div>
+</section>
+
+<!-- ================= EXIT TICKET ================= -->
+<section>
+  <div class="stitle"><div class="dot" style="background:var(--lilac)">🎟️</div><div><h2>3 · 2 · 1 exit ticket</h2><p>Wrap it up before you go.</p></div></div>
+  <div class="ticket">
+    <div class="col"><div class="big">3</div><span class="tier t1" style="background:#fff"><i>1</i>Recall</span><p style="margin:8px 0 0">commands from the video</p>
+      <input class="fill" data-k="x3a"><input class="fill" data-k="x3b"><input class="fill" data-k="x3c"></div>
+    <div class="col"><div class="big">2</div><span class="tier t2" style="background:#fff"><i>2</i>Explain</span><p style="margin:8px 0 0">passwords, and what each one unlocks</p>
+      <textarea class="fill" data-k="x2a"></textarea><textarea class="fill" data-k="x2b"></textarea></div>
+    <div class="col"><div class="big">1</div><span class="tier" style="background:#fff">🙋</span><p style="margin:8px 0 0">question you still have</p>
+      <textarea class="fill" data-k="x1" style="min-height:150px"></textarea></div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="eggs">
+    <span style="font-family:Fredoka,sans-serif;font-weight:600">🥚 Easter eggs found:</span>
+    <div class="shells" id="shells"></div>
+    <span id="eggCount">0 / 7</span>
+    <button class="btn sun no-print" id="hintBtn">Give me a hint</button>
+  </div>
+  <div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap">
+    <button class="btn mint" id="printBtn">Print my organizer</button>
+    <button class="btn ghost" id="clearBtn">Clear my answers</button>
+  </div>
+  <p class="hint" id="hintText"></p>
+</footer>
+<p class="secret">psst… real network engineers say "no ip domain-lookup" saves lives. Try typos in user mode to see why.</p>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const PREFIX='vtyOrg:';
+
+/* ---------- toast + confetti ---------- */
+let toastT;
+function toast(msg,ms=3200){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),ms);}
+function confetti(n=60){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cols=['#FF7AB6','#FFC93C','#2FCBA8','#4B5BFF','#B9A6FF'];
+  for(let i=0;i<n;i++){const c=document.createElement('div');c.className='confetti';c.style.left=Math.random()*100+'vw';c.style.background=cols[i%cols.length];c.style.animationDuration=(1.6+Math.random()*1.8)+'s';c.style.animationDelay=(Math.random()*.4)+'s';document.body.appendChild(c);setTimeout(()=>c.remove(),4200);}
+}
+
+/* ---------- saved answers ---------- */
+$$('[data-k]').forEach(el=>{
+  const v=LS.get(PREFIX+el.dataset.k); if(v!==null) el.value=v;
+  el.addEventListener('input',()=>LS.set(PREFIX+el.dataset.k,el.value));
+});
+$('#printBtn').onclick=()=>window.print();
+$('#clearBtn').onclick=()=>{ if(!confirm('Clear every answer on this organizer?')) return; $$('[data-k]').forEach(el=>{el.value='';LS.del(PREFIX+el.dataset.k);}); toast('Answers cleared. Fresh start!'); };
+
+/* ---------- easter eggs ---------- */
+const EGGS={
+  konami:{hint:"Some codes work on more than networks. Think classic video game cheat codes, typed anywhere on this page."},
+  tickle:{hint:"The switch in the 'Meet the network' diagram is ticklish. Poke it a bunch of times, fast."},
+  sudo:{hint:"Try bossing the switch around like it's a Linux computer."},
+  cat:{hint:"The switch can 'show' lots of things. What would a cat lover ask it to show?"},
+  home:{hint:"Every computer has a 'home' address that always points back to itself. Ping it from the PC."},
+  towel:{hint:"There's a famous Telnet server at towel.blinkenlights.nl. Try reaching it from the PC."},
+  admin:{hint:"Sign your name on this organizer the same way you log in to the switch."}
+};
+const eggIds=Object.keys(EGGS);
+let found=new Set(JSON.parse(LS.get(PREFIX+'eggs')||'[]'));
+function drawEggs(){
+  $('#shells').innerHTML=eggIds.map(id=>`<span class="${found.has(id)?'got':''}"></span>`).join('');
+  $('#eggCount').textContent=found.size+' / '+eggIds.length;
+}
+function egg(id,msg){
+  if(found.has(id)) return;
+  found.add(id); LS.set(PREFIX+'eggs',JSON.stringify([...found])); drawEggs();
+  confetti(40); toast('🥚 Easter egg found! '+(msg||''));
+  if(found.size===eggIds.length) setTimeout(()=>{confetti(120);toast('🏆 You found ALL the easter eggs. Certified network goblin.',4500);},1800);
+}
+drawEggs();
+let hintI=0;
+$('#hintBtn').onclick=()=>{
+  const left=eggIds.filter(id=>!found.has(id));
+  if(!left.length){$('#hintText').textContent='No hints left. You found them all!';return;}
+  $('#hintText').textContent='Hint: '+EGGS[left[hintI%left.length]].hint; hintI++;
+};
+// konami
+const KON=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];let kp=0;
+document.addEventListener('keydown',e=>{const k=e.key.length===1?e.key.toLowerCase():e.key;kp=(k===KON[kp])?kp+1:(k===KON[0]?1:0);if(kp===KON.length){kp=0;egg('konami','Packet party unlocked! 🎉');confetti(150);}});
+// tickle
+let clicks=[];const sw=$('#swDoodle');
+function tickle(){const now=Date.now();clicks=clicks.filter(t=>now-t<2000);clicks.push(now);if(clicks.length>=5){clicks=[];sw.classList.add('rainbow');setTimeout(()=>sw.classList.remove('rainbow'),3000);egg('tickle',"Hey! I'm a 2960, not a stress ball.");}}
+sw.addEventListener('click',tickle);sw.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tickle();}});
+// admin name
+$('#nameField').addEventListener('input',e=>{if(e.target.value.trim().toLowerCase()==='admin') egg('admin','Username accepted… wait, wrong login screen. 😄');});
+
+/* =========================================================
+   Pretend switch + PC
+   ========================================================= */
+const blankVty=()=>Array.from({length:16},()=>({login:'line',pw:null,tin:null,tout:null}));
+let SW, PC, FLAGS;
+function freshState(){
+  SW={host:'Switch',vlan1:{ip:null,mask:null,up:false},enablePw:null,enableSecret:null,users:{},vty:blankVty(),dirty:false,saved:null,everSaved:false};
+  PC={ip:'',mask:'',gw:''};
+  FLAGS={arp:false,pingOk:false,remotePriv:false};
+}
+freshState();
+
+const ipRe=/^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
+const ip2n=ip=>ip.split('.').reduce((a,b)=>(a*256)+(+b),0);
+function maskOk(m){if(!ipRe.test(m))return false;const n=ip2n(m);if(n===0)return false;const inv=(~n)>>>0;return ((inv+1)&inv)===0;}
+function sameNet(a,b,m){const M=ip2n(m);return ((ip2n(a)&M)>>>0)===((ip2n(b)&M)>>>0);}
+function reachable(){
+  const v=SW.vlan1;
+  return !!(v.up&&v.ip&&ipRe.test(PC.ip)&&maskOk(PC.mask)&&PC.ip!==v.ip&&sameNet(PC.ip,v.ip,PC.mask)&&sameNet(PC.ip,v.ip,v.mask));
+}
+
+/* ---------- terminal widget ---------- */
+function Term(root){
+  const out=root.querySelector('.out'),row=root.querySelector('.inrow'),pr=row.querySelector('.pr'),inp=row.querySelector('input');
+  const T={root,out,row,inp,busy:false,hist:[],hi:0,pager:null,handler:null,prompt:''};
+  T.scroll=()=>{root.scrollTop=root.scrollHeight;};
+  T.print=(txt='',cls)=>{String(txt).split('\n').forEach(l=>{const d=document.createElement('div');d.className='tl'+(cls?' '+cls:'');d.textContent=l;out.appendChild(d);});T.scroll();};
+  T.line=(txt='',cls)=>{const d=document.createElement('div');d.className='tl'+(cls?' '+cls:'');d.textContent=txt;out.appendChild(d);T.scroll();return d;};
+  T.setPrompt=(p,mask)=>{T.prompt=p;pr.textContent=p;inp.type=mask?'password':'text';};
+  T.clear=()=>{out.innerHTML='';};
+  T.page=(lines)=>new Promise(res=>{
+    const step=(n)=>{
+      if(T.pager&&T.pager.el) T.pager.el.remove();
+      const st=T.pager?T.pager.i:0, end=Math.min(lines.length,st+n);
+      for(let i=st;i<end;i++) T.line(lines[i]);
+      if(end>=lines.length){T.pager=null;row.classList.remove('hide');res();return;}
+      const el=document.createElement('div');el.className='tl';const s=document.createElement('span');s.className='more';s.textContent=' --More-- ';el.appendChild(s);out.appendChild(el);
+      s.onclick=()=>step(20);
+      T.pager={i:end,el,step,res};T.scroll();
+    };
+    T.pager=null; step(22);
+  });
+  inp.addEventListener('keydown',async e=>{
+    if(T.pager){
+      e.preventDefault();
+      if(e.key===' ') T.pager.step(20);
+      else if(e.key==='Enter') T.pager.step(1);
+      else {const p=T.pager;p.el.remove();T.pager=null;p.res();}
+      return;
+    }
+    if(T.busy){e.preventDefault();return;}
+    if(e.key==='ArrowUp'&&inp.type==='text'){if(T.hi>0){T.hi--;inp.value=T.hist[T.hi]||'';}e.preventDefault();return;}
+    if(e.key==='ArrowDown'&&inp.type==='text'){if(T.hi<T.hist.length){T.hi++;inp.value=T.hist[T.hi]||'';}e.preventDefault();return;}
+    if(e.key!=='Enter') return;
+    e.preventDefault();
+    const val=inp.value; inp.value='';
+    T.line(T.prompt+(inp.type==='password'?'':val));
+    if(inp.type==='text'&&val.trim()){T.hist.push(val);} T.hi=T.hist.length;
+    T.busy=true; pr.textContent=''; 
+    try{await T.handler(val);}catch(err){console.error(err);}
+    T.busy=false; if(!T.pager) row.classList.remove('hide');
+    T.scroll(); updateMissions();
+  });
+  root.addEventListener('click',()=>{if(!window.getSelection().toString()) inp.focus();});
+  return T;
+}
+
+const swT=Term($('#swTerm')), pcT=Term($('#pcTerm'));
+
+/* ---------- CLI helpers ---------- */
+const K=(t,w,min=1)=>!!t&&t.length>=min&&w.startsWith(t);
+const tokenize=line=>[...line.matchAll(/\S+/g)].map(m=>({v:m[0],l:m[0].toLowerCase(),i:m.index}));
+const SUFFIX={user:'>',priv:'#',config:'(config)#',if:'(config-if)#',line:'(config-line)#'};
+function promptFor(s){ if(s.await) return s.await.prompt; return SW.host+SUFFIX[s.mode]; }
+function bad(T,s,toks,n){
+  const base=promptFor(s).length; const pos=n<toks.length?toks[n].i:(toks.length?toks[toks.length-1].i+toks[toks.length-1].v.length+1:0);
+  T.print(' '.repeat(base+pos)+'^'); T.print("% Invalid input detected at '^' marker."); T.print('');
+}
+const incomplete=T=>{T.print('% Incomplete command.');T.print('');};
+function changed(){SW.dirty=true;}
+function cfgMsg(s,T){T.print(s.remote?'%SYS-5-CONFIG_I: Configured from console by admin on vty0 (192.168.1.2)':'%SYS-5-CONFIG_I: Configured from console by console');}
+async function unknownWord(T,w){
+  T.print(`Translating "${w}"...domain server (255.255.255.255)`);
+  await sleep(1400);
+  T.print('% Unknown command or computer name, or unable to find computer address');
+}
+
+function help(s,line,T){
+  const w=tokenize(line.replace(/\?$/,'')).map(t=>t.l);
+  const lists={
+    user:[['enable','Turn on privileged commands'],['exit','Exit from the EXEC'],['logout','Exit from the EXEC'],['ping','Send echo messages'],['show','Show running system information'],['telnet','Open a telnet connection']],
+    priv:[['configure','Enter configuration mode'],['copy','Copy from one file to another'],['disable','Turn off privileged commands'],['exit','Exit from the EXEC'],['ping','Send echo messages'],['show','Show running system information'],['write','Write running configuration to memory']],
+    config:[['do','To run exec commands in config mode'],['enable','Modify enable password parameters'],['end','Exit from configure mode'],['exit','Exit from configure mode'],['hostname','Set system\'s network name'],['interface','Select an interface to configure'],['line','Configure a terminal line'],['no','Negate a command or set its defaults'],['username','Establish User Name Authentication']],
+    if:[['do','To run exec commands in config mode'],['exit','Exit from interface configuration mode'],['ip','Interface Internet Protocol config commands'],['no','Negate a command or set its defaults'],['shutdown','Shutdown the selected interface']],
+    line:[['do','To run exec commands in config mode'],['exit','Exit from line configuration mode'],['login','Enable password checking'],['no','Negate a command or set its defaults'],['password','Set a password'],['transport','Define transport protocols for line']]
+  };
+  let rows=null;
+  if(s.mode==='line'&&K(w[0],'transport',2)){
+    if(w.length===1) rows=[['input','Define which protocols to use when connecting to the terminal server'],['output','Define which protocols to use for outgoing connections']];
+    else rows=[['all','All protocols'],['none','No protocols'],['ssh','TCP/IP SSH protocol'],['telnet','TCP/IP Telnet protocol']];
+  } else if(s.mode==='line'&&K(w[0],'login',3)) rows=[['local','Local password checking'],['<cr>','']];
+  else if(s.mode==='config'&&K(w[0],'line',3)) rows=[['console','Primary terminal line'],['vty','Virtual terminal']];
+  else if(s.mode==='config'&&K(w[0],'interface',3)) rows=[['FastEthernet','FastEthernet IEEE 802.3'],['GigabitEthernet','GigabitEthernet IEEE 802.3z'],['Vlan','Catalyst Vlans']];
+  else if(s.mode==='config'&&K(w[0],'enable',2)) rows=[['password','Assign the privileged level password'],['secret','Assign the privileged level secret']];
+  else if((s.mode==='priv'||s.mode==='user')&&K(w[0],'show',2)) rows=s.mode==='priv'?[['ip','IP information'],['running-config','Current operating configuration'],['startup-config','Contents of startup-config']]:[['ip','IP information']];
+  else if(s.mode==='priv'&&K(w[0],'configure',4)) rows=[['terminal','Configure from the terminal'],['<cr>','']];
+  if(!rows) rows=lists[s.mode];
+  rows.forEach(([a,b])=>T.print('  '+a.padEnd(16)+b));
+}
+
+/* ---------- running config ---------- */
+function buildRun(){
+  const L=[];
+  L.push('!','version 15.0','no service timestamps log datetime msec','no service timestamps debug datetime msec','no service password-encryption','!','hostname '+SW.host,'!');
+  if(SW.enableSecret) L.push('enable secret 5 $1$mERr$hx5rVt7rPNoS4wqbXKX7m0');
+  if(SW.enablePw) L.push('enable password '+SW.enablePw);
+  L.push('!','!','!');
+  Object.entries(SW.users).forEach(([n,u])=>L.push(`username ${n} privilege ${u.priv} password 0 ${u.pw}`));
+  L.push('!','!','!','spanning-tree mode pvst','spanning-tree extend system-id','!');
+  for(let i=1;i<=24;i++) L.push('interface FastEthernet0/'+i,'!');
+  L.push('interface GigabitEthernet0/1','!','interface GigabitEthernet0/2','!','interface Vlan1');
+  L.push(SW.vlan1.ip?` ip address ${SW.vlan1.ip} ${SW.vlan1.mask}`:' no ip address');
+  if(!SW.vlan1.up) L.push(' shutdown');
+  L.push('!','!','!','!','!','line con 0','!');
+  const key=v=>JSON.stringify(v);
+  let i=0;
+  while(i<16){
+    let j=i; const lim=i<5?4:15;
+    while(j+1<=lim&&key(SW.vty[j+1])===key(SW.vty[i])) j++;
+    L.push(j>i?`line vty ${i} ${j}`:`line vty ${i}`);
+    const v=SW.vty[i];
+    if(v.pw) L.push(' password '+v.pw);
+    if(v.login==='local') L.push(' login local'); else if(v.login==='line') L.push(' login');
+    if(v.tin) L.push(' transport input '+v.tin.join(' '));
+    if(v.tout) L.push(' transport output '+v.tout.join(' '));
+    i=j+1;
+  }
+  L.push('!','!','!','end');
+  const bytes=L.reduce((a,l)=>a+l.length+1,0);
+  return ['Building configuration...','','Current configuration : '+bytes+' bytes'].concat(L);
+}
+function ipBrief(){
+  const L=['Interface              IP-Address      OK? Method Status                Protocol '];
+  for(let i=1;i<=24;i++){const up=i===1;L.push(('FastEthernet0/'+i).padEnd(23)+'unassigned      YES manual '+(up?'up                    up':'down                  down'));}
+  L.push('GigabitEthernet0/1     unassigned      YES manual down                  down','GigabitEthernet0/2     unassigned      YES manual down                  down');
+  const v=SW.vlan1;L.push('Vlan1'.padEnd(23)+(v.ip||'unassigned').padEnd(16)+'YES manual '+(v.up?'up                    up':'administratively down down'));
+  return L;
+}
+
+/* ---------- switch-side ping ---------- */
+async function swPing(T,toks,n){
+  const tgt=toks[n]&&toks[n].v;
+  if(!tgt){incomplete(T);return;}
+  if(!ipRe.test(tgt)){await unknownWord(T,tgt);return;}
+  T.print('Type escape sequence to abort.');
+  T.print(`Sending 5, 100-byte ICMP Echos to ${tgt}, timeout is 2 seconds:`);
+  const ln=T.line('');
+  let ok=0;
+  const self=tgt===SW.vlan1.ip&&SW.vlan1.up;
+  const good=self||(tgt===PC.ip&&reachable());
+  for(let i=0;i<5;i++){
+    await sleep(good?260:700);
+    let ch='.';
+    if(good){ if(!self&&!FLAGS.arp&&i===0){FLAGS.arp=true;} else {ch='!';ok++;} }
+    ln.textContent+=ch;T.scroll();
+  }
+  T.print(`Success rate is ${ok*20} percent (${ok}/5)`+(ok?', round-trip min/avg/max = 0/0/1 ms':''));
+}
+
+/* ---------- CLI engine ---------- */
+const NOPE=Symbol('nope');
+
+async function cli(s,line,T){
+  // waiting for a password / username / RETURN
+  if(s.await){
+    const a=s.await;
+    if(a.kind==='return'){s.await=null;return;}
+    if(a.kind==='enable'){
+      const ok=SW.enableSecret?line===SW.enableSecret:line===SW.enablePw;
+      if(ok){s.await=null;s.mode='priv';if(s.remote)FLAGS.remotePriv=true;return;}
+      a.tries++; if(a.tries>=3){s.await=null;T.print('% Bad passwords');T.print('');}
+      return;
+    }
+    if(a.kind==='loginUser'){s.tmpUser=line.trim();s.await={kind:'loginPass',prompt:'Password: ',mask:true,tries:a.tries};return;}
+    if(a.kind==='loginPass'||a.kind==='linePass'){
+      const v=SW.vty[0];
+      const ok=a.kind==='loginPass'?(SW.users[s.tmpUser]&&SW.users[s.tmpUser].pw===line):(line===v.pw);
+      if(ok){T.print('');s.await=null;s.mode='user';return;}
+      const tries=(a.tries||0)+1;
+      if(a.kind==='loginPass'){T.print('% Login invalid');T.print('');
+        if(tries>=3){s.closed=true;s.await=null;return;}
+        s.await={kind:'loginUser',prompt:'Username: ',mask:false,tries};
+      } else {
+        if(tries>=3){T.print('% Bad passwords');s.closed=true;s.await=null;return;}
+        s.await={kind:'linePass',prompt:'Password: ',mask:true,tries};
+      }
+      return;
+    }
+  }
+  const toks=tokenize(line);
+  if(!toks.length) return;
+  const w=toks.map(t=>t.l);
+  // eggs
+  if(w[0]==='sudo'){egg('sudo','The switch is not impressed.');T.print("% sudo? This is Cisco IOS, not Linux. The switch does not take orders from root. 🐧");T.print('');return;}
+  if(w[0]==='meow'||(K(w[0],'show',2)&&w[1]==='cat')){egg('cat','show cat: 1 cat detected on VLAN 1.');
+    T.print(' /\\_/\\   CatOS (definitely not real) Version 9.lives');T.print('( o.o )  Uptime: 16 naps, 3 zoomies');T.print(' > ^ <   1 cat detected on Vlan1, purring on FastEthernet0/1');T.print('');return;}
+  if(line.trim().endsWith('?')){help(s,line,T);return;}
+
+  const m=s.mode;
+  if(m==='user') return execUser(s,toks,T);
+  if(m==='priv') return execPriv(s,toks,T,false);
+  if(K(w[0],'do',2)&&w[0]==='do'){ if(toks.length<2){incomplete(T);return;} return execPriv(s,toks.slice(1),T,true,toks); }
+  if(m==='if'){const r=await execIf(s,toks,T);if(r!==NOPE)return;}
+  if(m==='line'){const r=await execLine(s,toks,T);if(r!==NOPE)return;}
+  return execConfig(s,toks,T);
+}
+
+function logout(s,T){
+  if(s.remote){s.closed=true;return;}
+  T.print('');T.print(SW.host+' con0 is now available');T.print('');T.print('');T.print('');T.print('');T.print('');T.print('Press RETURN to get started.');T.print('');
+  s.mode='user';s.await={kind:'return',prompt:'',mask:false};
+}
+function doEnable(s,T){
+  if(s.mode==='priv') return;
+  if(s.remote&&!SW.enablePw&&!SW.enableSecret){T.print('% No password set.');T.print('');return;}
+  if(SW.enablePw||SW.enableSecret){s.await={kind:'enable',prompt:'Password: ',mask:true,tries:0};return;}
+  s.mode='priv';
+}
+
+async function execUser(s,t,T){
+  const w=t.map(x=>x.l);
+  if(K(w[0],'enable',2)) return doEnable(s,T);
+  if(K(w[0],'exit',3)||K(w[0],'logout',4)) return logout(s,T);
+  if(K(w[0],'ping',2)) return swPing(T,t,1);
+  if(K(w[0],'show',2)){
+    if(!w[1]) return incomplete(T);
+    if(K(w[1],'ip',2)&&K(w[2],'interface',3)&&K(w[3],'brief',2)) return T.page(ipBrief());
+    return bad(T,s,t,1);
+  }
+  if(K(w[0],'telnet',2)){T.print('Trying '+(t[1]?t[1].v:'')+' ...');await sleep(900);T.print('% Connection refused by remote host');T.print('');return;}
+  if(t.length===1) return unknownWord(T,t[0].v);
+  return bad(T,s,t,0);
+}
+
+async function execPriv(s,t,T,viaDo,fullToks){
+  const w=t.map(x=>x.l);
+  const errAt=n=>bad(T,s,fullToks||t,(fullToks?n+1:n));
+  if(K(w[0],'configure',4)){
+    if(viaDo) return errAt(0);
+    if(w[1]&&!K(w[1],'terminal',1)) return errAt(1);
+    T.print('Enter configuration commands, one per line.  End with CNTL/Z.');s.mode='config';return;
+  }
+  if(K(w[0],'disable',4)){if(viaDo)return errAt(0);s.mode='user';return;}
+  if(K(w[0],'enable',2)){if(viaDo)return errAt(0);return;}
+  if(K(w[0],'exit',3)||K(w[0],'logout',4)){if(viaDo)return errAt(0);return logout(s,T);}
+  if(K(w[0],'show',2)){
+    if(!w[1]) return incomplete(T);
+    if(K(w[1],'running-config',3)) return T.page(buildRun());
+    if(K(w[1],'startup-config',4)){ if(!SW.saved){T.print('startup-config is not present');T.print('');return;} return T.page(SW.saved); }
+    if(K(w[1],'ip',2)&&K(w[2],'interface',3)&&K(w[3],'brief',2)) return T.page(ipBrief());
+    return errAt(1);
+  }
+  if(K(w[0],'write',2)){
+    if(w[1]&&!K(w[1],'memory',1)) return errAt(1);
+    T.print('Building configuration...');await sleep(500);T.print('[OK]');
+    SW.saved=buildRun().slice(1);SW.dirty=false;SW.everSaved=true;return;
+  }
+  if(K(w[0],'copy',2)){
+    if(K(w[1],'running-config',3)&&K(w[2],'startup-config',3)){T.print('Destination filename [startup-config]? ');await sleep(400);T.print('Building configuration...');await sleep(400);T.print('[OK]');SW.saved=buildRun().slice(1);SW.dirty=false;SW.everSaved=true;return;}
+    return w[1]?errAt(K(w[1],'running-config',3)?2:1):incomplete(T);
+  }
+  if(K(w[0],'ping',2)) return swPing(T,t,1);
+  if(K(w[0],'telnet',2)){T.print('Trying '+(t[1]?t[1].v:'')+' ...');await sleep(900);T.print('% Connection refused by remote host');T.print('');return;}
+  if(!viaDo&&t.length===1) return unknownWord(T,t[0].v);
+  return errAt(0);
+}
+
+async function execConfig(s,t,T){
+  const w=t.map(x=>x.l);
+  if(K(w[0],'interface',3)){
+    const rest=w.slice(1).join('');
+    if(!rest) return incomplete(T);
+    let mv=rest.match(/^v(?:l(?:a(?:n)?)?)?(\d+)$/);
+    if(mv){const n=+mv[1];if(n<1||n>4094)return bad(T,s,t,1);s.mode='if';s.ifName='Vlan'+n;return;}
+    let mf=rest.match(/^f[a-z]*0\/(\d+)$/);
+    if(mf){const n=+mf[1];if(n<1||n>24)return bad(T,s,t,1);s.mode='if';s.ifName='FastEthernet0/'+n;return;}
+    let mg=rest.match(/^g[a-z]*0\/([12])$/);
+    if(mg){s.mode='if';s.ifName='GigabitEthernet0/'+mg[1];return;}
+    return bad(T,s,t,1);
+  }
+  if(K(w[0],'line',3)){
+    if(!w[1]) return incomplete(T);
+    if(K(w[1],'vty',1)){
+      if(!w[2]) return incomplete(T);
+      const a=+w[2], b=w[3]!==undefined?+w[3]:a;
+      if(!/^\d+$/.test(w[2])||a>15) return bad(T,s,t,2);
+      if(w[3]!==undefined&&(!/^\d+$/.test(w[3])||b<a||b>15)) return bad(T,s,t,3);
+      s.mode='line';s.range=[a,b];return;
+    }
+    if(K(w[1],'console',2)){ if(w[2]!=='0') return w[2]?bad(T,s,t,2):incomplete(T); s.mode='line';s.range='con';return; }
+    return bad(T,s,t,1);
+  }
+  if(K(w[0],'enable',2)){
+    if(!w[1]) return incomplete(T);
+    if(K(w[1],'password',1)){ if(!t[2]) return incomplete(T); SW.enablePw=t[2].v; changed(); return; }
+    if(K(w[1],'secret',1)){ if(!t[2]) return incomplete(T); SW.enableSecret=t[2].v; changed(); return; }
+    return bad(T,s,t,1);
+  }
+  if(K(w[0],'username',2)){
+    if(!t[1]) return incomplete(T);
+    let i=2, priv=1;
+    if(K(w[2],'privilege',2)){ if(!w[3]) return incomplete(T); if(!/^\d+$/.test(w[3])||+w[3]>15) return bad(T,s,t,3); priv=+w[3]; i=4; }
+    if(!w[i]) return incomplete(T);
+    if(!(K(w[i],'password',1)||K(w[i],'secret',1))) return bad(T,s,t,i);
+    if(!t[i+1]) return incomplete(T);
+    SW.users[t[1].v]={pw:t[i+1].v,priv}; changed(); return;
+  }
+  if(K(w[0],'hostname',2)){
+    if(!t[1]) return incomplete(T);
+    if(!/^[A-Za-z][A-Za-z0-9-]{0,62}$/.test(t[1].v)) return bad(T,s,t,1);
+    SW.host=t[1].v; changed(); return;
+  }
+  if(w[0]==='no'){
+    if(!w[1]) return incomplete(T);
+    if(K(w[1],'enable',2)){ if(K(w[2],'password',1)){SW.enablePw=null;changed();return;} if(K(w[2],'secret',1)){SW.enableSecret=null;changed();return;} return w[2]?bad(T,s,t,2):incomplete(T); }
+    if(K(w[1],'username',2)){ if(!t[2]) return incomplete(T); delete SW.users[t[2].v]; changed(); return; }
+    if(K(w[1],'ip',2)&&K(w[2],'domain-lookup',8)){ return; }
+    return bad(T,s,t,1);
+  }
+  if(K(w[0],'exit',3)){ s.mode=s.mode==='config'?'priv':'config'; if(s.mode==='priv') cfgMsg(s,T); return; }
+  if(K(w[0],'end',2)){ s.mode='priv'; cfgMsg(s,T); return; }
+  return bad(T,s,t,0);
+}
+
+async function execIf(s,t,T){
+  const w=t.map(x=>x.l);
+  const isV1=s.ifName==='Vlan1';
+  if(K(w[0],'ip',2)&&K(w[1],'address',2)){
+    if(!s.ifName.startsWith('Vlan')) return bad(T,s,t,0);
+    if(!t[2]) return incomplete(T);
+    if(!ipRe.test(t[2].v)) return bad(T,s,t,2);
+    if(!t[3]) return incomplete(T);
+    if(!maskOk(t[3].v)) return bad(T,s,t,3);
+    if(isV1){ if(SW.vlan1.ip!==t[2].v) FLAGS.arp=false; SW.vlan1.ip=t[2].v; SW.vlan1.mask=t[3].v; changed(); }
+    return;
+  }
+  if(w[0]==='no'&&K(w[1],'shutdown',2)){
+    if(isV1&&!SW.vlan1.up){ SW.vlan1.up=true; changed(); T.print(''); await sleep(500);
+      T.print('%LINK-5-CHANGED: Interface Vlan1, changed state to up');T.print('');await sleep(500);
+      T.print('%LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan1, changed state to up');T.print(''); }
+    return;
+  }
+  if(K(w[0],'shutdown',2)){
+    if(isV1&&SW.vlan1.up){ SW.vlan1.up=false; FLAGS.arp=false; changed(); T.print('');
+      T.print('%LINK-5-CHANGED: Interface Vlan1, changed state to administratively down');
+      T.print('%LINEPROTO-5-UPDOWN: Line protocol on Interface Vlan1, changed state to down'); }
+    return;
+  }
+  return NOPE;
+}
+
+async function execLine(s,t,T){
+  const w=t.map(x=>x.l);
+  const each=fn=>{ if(s.range==='con') return; for(let i=s.range[0];i<=s.range[1];i++) fn(SW.vty[i]); changed(); };
+  if(K(w[0],'login',3)){
+    if(!w[1]){each(v=>v.login='line');return;}
+    if(K(w[1],'local',1)){each(v=>v.login='local');return;}
+    return bad(T,s,t,1);
+  }
+  if(w[0]==='no'&&K(w[1],'login',3)){each(v=>v.login=null);return;}
+  if(K(w[0],'password',2)){ if(!t[1]) return incomplete(T); each(v=>v.pw=t[1].v); return; }
+  if(K(w[0],'transport',2)){
+    if(!w[1]) return incomplete(T);
+    const isIn=K(w[1],'input',1), isOut=K(w[1],'output',1);
+    if(!isIn&&!isOut) return bad(T,s,t,1);
+    if(!w[2]) return incomplete(T);
+    const opts=[];
+    for(let i=2;i<w.length;i++){
+      const o=['all','none','ssh','telnet'].find(x=>K(w[i],x,1));
+      if(!o) return bad(T,s,t,i);
+      if(!opts.includes(o)) opts.push(o);
+    }
+    if(isIn) each(v=>v.tin=opts); else {
+      each(v=>v.tout=opts);
+      T.print("% Lab tip: 'output' is for connections leaving the switch.");
+      T.print("% To let Telnet IN from the PC, use: transport input telnet");
+    }
+    return;
+  }
+  return NOPE;
+}
+
+/* ---------- switch console ---------- */
+let con;
+function bootSwitch(){
+  con={mode:'user',await:{kind:'return',prompt:'',mask:false},remote:false};
+  swT.clear();
+  ['Cisco IOS Software, C2960 Software (C2960-LANBASEK9-M), Version 15.0(2)SE4, RELEASE SOFTWARE (fc1)','Copyright (c) 1986-2013 by Cisco Systems, Inc.','',
+   '%LINK-5-CHANGED: Interface FastEthernet0/1, changed state to up','%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/1, changed state to up','','Press RETURN to get started!',''].forEach(l=>swT.line(l,l.startsWith('%')?'dim':''));
+  swT.setPrompt('',false);
+}
+swT.handler=async line=>{ await cli(con,line,swT); const a=con.await; swT.setPrompt(promptFor(con),a&&a.mask); };
+
+/* ---------- PC ---------- */
+let remote=null;
+function pcPrompt(){ if(remote){const a=remote.await;pcT.setPrompt(promptFor(remote),a&&a.mask);} else pcT.setPrompt('C:\\>',false); }
+function bootPC(){
+  remote=null; pcT.clear();
+  pcT.line('Packet Tracer PC Command Line 1.0'); pcT.line(''); pcPrompt();
+  $('#pcIp').value=PC.ip; $('#pcMask').value=PC.mask; $('#pcGw').value=PC.gw; pcStatus();
+}
+function pcStatus(){
+  const el=$('#pcStatus');
+  if(!PC.ip&&!PC.mask){el.textContent='Desktop → IP Configuration. Fill this in, then use the command prompt below.';return;}
+  if(!ipRe.test(PC.ip)){el.textContent='⚠️ That IPv4 address isn\'t valid yet. Four numbers from 0 to 255, separated by dots.';return;}
+  if(!maskOk(PC.mask)){el.textContent='⚠️ Add a valid subnet mask (like the one from the video).';return;}
+  el.textContent='✅ IP configuration saved: '+PC.ip+' / '+PC.mask+(PC.gw?' (gateway '+PC.gw+')':'');
+}
+['pcIp','pcMask','pcGw'].forEach(id=>$('#'+id).addEventListener('input',e=>{
+  const v=e.target.value.trim();
+  if(id==='pcIp'){ if(v!==PC.ip) FLAGS.arp=false; PC.ip=v; } else if(id==='pcMask') PC.mask=v; else PC.gw=v;
+  pcStatus(); updateMissions();
+}));
+
+async function pcPing(tgt){
+  const T=pcT;
+  if(!tgt){T.print('Usage: ping <ip address>');return;}
+  if(tgt==='127.0.0.1'||tgt==='localhost'){ egg('home',"There's no place like 127.0.0.1 🏠");
+    T.print('');T.print("There's no place like 127.0.0.1 🏠");T.print('');T.print('Pinging 127.0.0.1 with 32 bytes of data:');T.print('');
+    for(let i=0;i<4;i++){await sleep(350);T.print('Reply from 127.0.0.1: bytes=32 time<1ms TTL=128');}
+    T.print('');T.print('Ping statistics for 127.0.0.1:');T.print('    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),');T.print('');return; }
+  if(!ipRe.test(tgt)){T.print('Ping request could not find host '+tgt+'. Please check the name and try again.');T.print('');return;}
+  if(!ipRe.test(PC.ip)||!maskOk(PC.mask)){T.print('');T.print('This PC has no IP address yet. Fill in the IP Configuration boxes above first.');T.print('');return;}
+  T.print('');T.print(`Pinging ${tgt} with 32 bytes of data:`);T.print('');
+  const self=tgt===PC.ip, good=self||(tgt===SW.vlan1.ip&&reachable());
+  let rec=0;
+  for(let i=0;i<4;i++){
+    if(good&&!self&&!FLAGS.arp&&i===0){await sleep(1600);T.print('Request timed out.');FLAGS.arp=true;continue;}
+    if(good){await sleep(400);T.print(`Reply from ${tgt}: bytes=32 time<1ms TTL=${self?128:255}`);rec++;}
+    else{await sleep(1300);T.print('Request timed out.');}
+  }
+  const lost=4-rec;
+  T.print('');T.print(`Ping statistics for ${tgt}:`);T.print(`    Packets: Sent = 4, Received = ${rec}, Lost = ${lost} (${lost*25}% loss),`);
+  if(rec){T.print('Approximate round trip times in milli-seconds:');T.print('    Minimum = 0ms, Maximum = 0ms, Average = 0ms');}
+  T.print('');
+  if(rec&&tgt===SW.vlan1.ip) FLAGS.pingOk=true;
+}
+
+async function pcTelnet(tgt){
+  const T=pcT;
+  if(!tgt){T.print('Usage: telnet <ip address>');return;}
+  if(/^towel\.blinkenlights\.nl$/i.test(tgt)){ egg('towel','A long time ago, in a network far, far away…');
+    T.print('Trying towel.blinkenlights.nl ...');await sleep(900);
+    ['','      .  *  .   A long time ago, in a network far,','   *      .     far away....','  .   *        ','       Our tiny lab PC can\'t reach the real internet,','       but that famous server really does play an','       entire space movie in ASCII art over Telnet. 🌌',''].forEach(l=>T.print(l));
+    T.print('[Connection to towel.blinkenlights.nl closed by foreign host]');T.print('');return; }
+  T.print('Trying '+tgt+' ...'+(ipRe.test(PC.ip)&&tgt===SW.vlan1.ip&&reachable()?'Open':''));
+  if(!(ipRe.test(tgt)&&tgt===SW.vlan1.ip&&reachable())){await sleep(1500);T.print('% Connection timed out; remote host not responding');T.print('');return;}
+  FLAGS.arp=true;
+  const v=SW.vty[0];
+  if(v.tin&&!(v.tin.includes('telnet')||v.tin.includes('all'))){T.print('');T.print('% Connection refused by remote host');T.print('');return;}
+  remote={mode:'user',remote:true,await:null};
+  if(v.login==='local'){T.print('');T.print('');T.print('User Access Verification');T.print('');remote.await={kind:'loginUser',prompt:'Username: ',mask:false,tries:0};}
+  else if(v.login==='line'){
+    if(!v.pw){T.print('');T.print('Password required, but none set');T.print('');T.print('[Connection to '+tgt+' closed by foreign host]');T.print('');remote=null;return;}
+    T.print('');T.print('User Access Verification');T.print('');remote.await={kind:'linePass',prompt:'Password: ',mask:true,tries:0};
+  }
+}
+
+pcT.handler=async line=>{
+  if(remote){
+    await cli(remote,line,pcT);
+    if(remote.closed){pcT.print('');pcT.print('[Connection to '+SW.vlan1.ip+' closed by foreign host]');pcT.print('');remote=null;}
+    pcPrompt();return;
+  }
+  const t=tokenize(line), w=t.map(x=>x.l);
+  if(!t.length){pcPrompt();return;}
+  if(w[0]==='sudo'){egg('sudo','The PC is not impressed either.');pcT.print("'sudo' is not recognized. This PC runs on vibes and Packet Tracer. 🐧");pcT.print('');}
+  else if(w[0]==='ping') await pcPing(t[1]&&t[1].v);
+  else if(w[0]==='telnet') await pcTelnet(t[1]&&t[1].v);
+  else if(w[0]==='ipconfig'){
+    pcT.print('');pcT.print('FastEthernet0 Connection:(default port)');pcT.print('');
+    pcT.print('   Connection-specific DNS Suffix..: ');pcT.print('   Link-local IPv6 Address.........: FE80::201:42FF:FE5C:9A1B');pcT.print('   IPv6 Address....................: ::');
+    pcT.print('   IPv4 Address....................: '+(ipRe.test(PC.ip)?PC.ip:'0.0.0.0'));pcT.print('   Subnet Mask.....................: '+(maskOk(PC.mask)?PC.mask:'0.0.0.0'));
+    pcT.print('   Default Gateway.................: ::');pcT.print('                                     '+(ipRe.test(PC.gw)?PC.gw:'0.0.0.0'));pcT.print('');
+  }
+  else if(w[0]==='cls'||w[0]==='clear') pcT.clear();
+  else if(w[0]==='help'||w[0]==='?'){['Available Commands:','ipconfig    Display network configuration','ping        Send echo messages','telnet      Telnet client','cls         Clear the screen','?           Display the list of available commands'].forEach(l=>pcT.print(l));pcT.print('');}
+  else if(w[0]==='meow'){egg('cat','Wrong device, but sure.');pcT.print(' /\\_/\\  The cat walked across the keyboard.');pcT.print('( o.o ) Try "show cat" on the switch for the full experience.');pcT.print('');}
+  else {pcT.print('Invalid Command.');pcT.print('');}
+  pcPrompt();
+};
+
+/* ---------- missions ---------- */
+const MISSIONS=[
+  ['m1','Give VLAN 1 the IP 192.168.1.3 /24',()=>SW.vlan1.ip==='192.168.1.3'&&SW.vlan1.mask==='255.255.255.0'],
+  ['m2','Turn VLAN 1 on (no shutdown)',()=>SW.vlan1.up],
+  ['m3','Give the PC 192.168.1.2 /24',()=>PC.ip==='192.168.1.2'&&PC.mask==='255.255.255.0'],
+  ['m4','Ping the switch from the PC and get replies',()=>FLAGS.pingOk],
+  ['m5','Create an enable password',()=>!!(SW.enablePw||SW.enableSecret)],
+  ['m6','Create a local username and password',()=>Object.keys(SW.users).length>0],
+  ['m7','Put login local on all 16 VTY lines',()=>SW.vty.every(v=>v.login==='local')],
+  ['m8','Allow Telnet in on all 16 VTY lines',()=>SW.vty.every(v=>v.tin&&(v.tin.includes('telnet')||v.tin.includes('all')))],
+  ['m9','Save your config (do write)',()=>SW.everSaved&&!SW.dirty],
+  ['m10','Telnet in from the PC and reach Switch#',()=>FLAGS.remotePriv]
+];
+let celebrated=false;
+function updateMissions(){
+  let n=0;
+  $('#missionList').innerHTML=MISSIONS.map(([id,txt,fn],i)=>{const d=fn();if(d)n++;return `<li class="${d?'done':''}"><span class="box">${d?'✓':i+1}</span><span class="txt">${txt}</span></li>`;}).join('');
+  $('#missionBar').style.width=(n*10)+'%';
+  $('#missionCount').textContent=n+' of 10 done';
+  if(n===10&&!celebrated){celebrated=true;confetti(120);toast('🎉 Mission complete! You configured Telnet on a switch.',4500);}
+}
+
+/* ---------- tabs + reset ---------- */
+$$('.tabs button').forEach(b=>b.addEventListener('click',()=>{
+  $$('.tabs button').forEach(x=>x.setAttribute('aria-selected',x===b?'true':'false'));
+  $$('.pane').forEach(p=>p.classList.toggle('on',p.id===b.dataset.pane));
+  (b.dataset.pane==='swPane'?swT:pcT).inp.focus({preventScroll:true});
+}));
+$('#resetLab').onclick=()=>{ if(!confirm('Reset the practice switch and PC to factory settings?')) return; freshState(); celebrated=false; bootSwitch(); bootPC(); updateMissions(); toast('Practice lab reset.'); };
+
+bootSwitch(); bootPC(); updateMissions();
+})();
+</script>
+</body>
+</html>
